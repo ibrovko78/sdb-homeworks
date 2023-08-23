@@ -14,9 +14,9 @@
 
 2. [Кеширование Redis/memcached](https://github.com/ibrovko78/sdb-homeworks/blob/main/11-02.md).
 
-3. [ELK](https://github.com/netology-code/sdb-homeworks/blob/main/11-03.md).
+3. [ELK](https://github.com/ibrovko78/sdb-homeworks/blob/main/11-03.md).
 
-4. [Очереди RabbitMQ](https://github.com/netology-code/sdb-homeworks/blob/main/11-04.md).
+4. [Очереди RabbitMQ](https://github.com/ibrovko78/sdb-homeworks/blob/main/11-04.md).
 
 
 ## Модуль «Реляционные базы данных и администрирование баз данных»
