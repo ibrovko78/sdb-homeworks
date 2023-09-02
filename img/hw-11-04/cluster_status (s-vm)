@@ -1,0 +1,53 @@
+Cluster status of node rabbit@s-vm ...
+[1mBasics[0m
+
+Cluster name: rabbit@s-elk.corp.fishdv.ru
+
+[1mDisk Nodes[0m
+
+rabbit@s-elk
+
+[1mRAM Nodes[0m
+
+rabbit@s-vm
+
+[1mRunning Nodes[0m
+
+rabbit@s-elk
+rabbit@s-vm
+
+[1mVersions[0m
+
+rabbit@s-elk: RabbitMQ 3.8.9 on Erlang 23.2.6
+rabbit@s-vm: RabbitMQ 3.8.9 on Erlang 23.2.6
+
+[1mMaintenance status[0m
+
+Node: rabbit@s-elk, status: not under maintenance
+Node: rabbit@s-vm, status: not under maintenance
+
+[1mAlarms[0m
+
+(none)
+
+[1mNetwork Partitions[0m
+
+(none)
+
+[1mListeners[0m
+
+Node: rabbit@s-elk, interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Node: rabbit@s-elk, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@s-elk, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+Node: rabbit@s-vm, interface: [::], port: 15672, protocol: http, purpose: HTTP API
+Node: rabbit@s-vm, interface: [::], port: 25672, protocol: clustering, purpose: inter-node and CLI tool communication
+Node: rabbit@s-vm, interface: [::], port: 5672, protocol: amqp, purpose: AMQP 0-9-1 and AMQP 1.0
+
+[1mFeature flags[0m
+
+Flag: drop_unroutable_metric, state: disabled
+Flag: empty_basic_get_metric, state: disabled
+Flag: implicit_default_bindings, state: enabled
+Flag: maintenance_mode_status, state: enabled
+Flag: quorum_queue, state: enabled
+Flag: virtual_host_metadata, state: enabled
