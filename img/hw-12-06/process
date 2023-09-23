@@ -1,0 +1,88 @@
+docker run -d --name replication-master -e MYSQL_ALLOW_EMPTY_PASSWORD=true -v ~/path/to/world/dump:/docker-entrypoint-initdb.d  mysql:8.0
+docker run -d --name replication-slave -e MYSQL_ALLOW_EMPTY_PASSWORD=true mysql:8.0
+docker network create replication
+docker network connect replication replication-master
+docker network connect replication replication-slave
+
+docker exec replication-master microdnf makecache && docker exec replication-master microdnf install -y nano
+docker exec replication-slave microdnf makecache && docker exec replication-slave microdnf install -y nano mc
+
+### MASTER
+создадим учетную запись на мастере, которая будет использоваться для репликации:
+docker exec -it replication-master mysql
+
+mysql> CREATE USER 'replication'@'%';
+mysql> GRANT REPLICATION SLAVE ON *.* TO 'replication'@'%';
+
+изменим конфигурационные файлы для мастер-сервера
+docker exec -it replication-master sh -c "nano /etc/mysql/my.cnf"
+
+перезагружаем контейнер
+docker restart replication-master
+
+заходим в контейнер и проверяем что двоичный журнал включен
+docker exec -it replication-master mysql
+mysql> SHOW MASTER STATUS;
+
+Для того, чтобы начать репликацию данных, необходимо “подтянуть” слейв до состояния мастера.
+Для этого, нужно временно заблокировать сам мастер, чтобы сделать слепок актуальных данных.
+mysql> FLUSH TABLES WITH READ LOCK;
+
+с помощью mysqldump сделаем экспорт данных из базы
+docker exec -it replication-master mysqldump world > /root/world.sql
+
+снимаем блокировку
+docker exec -it replication-master mysql
+mysql> UNLOCK TABLES;
+
+### SLAVE
+docker cp /root/world.sql replication-slave:/tmp/world.sql
+docker exec -it replication-slave mysql
+mysql> CREATE DATABASE `world`;
+docker exec -it replication-slave bash
+~ mysqldump world < /tmp/world.sql
+
+изменим конфигурационные файлы для слейв-сервера
+docker exec -it replication-slave sh -c "nano /etc/mysql/my.cnf"
+
+log_bin = mysql-bin
+server_id = 2
+relay-log = /var/lib/mysql/mysql-relay-bin
+relay-log-index = /var/lib/mysql/mysql-relay-bin.index
+read_only = 1
+
+перезагружаем контейнер
+docker restart replication-slave
+
+И теперь нам нужно указать слейву, какой сервер будет являться для него мастером, и откуда начинать реплицировать данные.
+Вместо MASTER_LOG_FILE и MASTER_LOG_POS необходимо подставить значения, полученные из SHOW MASTER STATUS на мастере.
+Эти параметры вместе называются координатами двоичного журнала
+
+docker exec -it replication-slave mysql
+mysql> CHANGE MASTER TO MASTER_HOST='replication-master', MASTER_USER='replication', MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=157;
+
+Запустим воспроизведение журнала ретрансляции, и проверим статус репликации
+mysql> START SLAVE;
+mysql> SHOW SLAVE STATUS\G
+
+---
+Попробуем изменить данные на мастере:
+
+docker exec -it replication-master mysql
+mysql> USE world;
+mysql> INSERT INTO city (Name, CountryCode, District, Population) VALUES ('Test-Replication', 'ALB', 'Test', 42);
+
+
+проверяем, появились ли они на слейве
+docker exec -it replication-slave mysql
+mysql> USE world;
+mysql> SELECT * FROM city;
+
+---
+create table city
+( 
+Name varchar(30),
+CountryCode varchar(30),
+District varchar(30),
+Population varchar(30)
+);
