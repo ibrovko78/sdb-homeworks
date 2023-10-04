@@ -1,0 +1,43 @@
+Имя    postgresql-ibrovko
+
+Идентификатор    c9qq687ki8m69t7pi1e8
+
+rc1a-9nv9fwy5kg53d8qt.mdb.yandexcloud.net
+rc1b-jr2msp98sb6nc7ip.mdb.yandexcloud.net  - replica
+---
+Подключиться к postgresql-ibrovko
+
+1.Установите сертификат:
+mkdir -p ~/.postgresql && \
+wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+    --output-document ~/.postgresql/root.crt && \
+chmod 0600 ~/.postgresql/root.crt
+
+2.Установите зависимости:
+sudo apt update && sudo apt install --yes postgresql-client
+
+3.Подключитесь к базе данных:
+psql "host=rc1a-9nv9fwy5kg53d8qt.mdb.yandexcloud.net,rc1b-jr2msp98sb6nc7ip.mdb.yandexcloud.net \
+    port=6432 \
+    sslmode=verify-full \
+    dbname=db1 \
+    user=user1 \
+    target_session_attrs=read-write"
+
+После выполнения команды введите пароль пользователя для завершения процедуры подключения.
+
+3.1 Подключение к реплике
+psql "host=rc1b-jr2msp98sb6nc7ip.mdb.yandexcloud.net \
+    port=6432 \
+    sslmode=verify-full \
+    dbname=db1 \
+    user=user1"
+
+4. Для проверки успешности подключения выполните запрос:
+
+SELECT version();
+
+------
+default-ru-central1-c	b0coquetr01dsursuab7 Auto-created default subnet for zone ru-central1-c in default 10.130.0.0/24 — Active ru-central1-c	—	—	
+default-ru-central1-b	e2lg3ht5ghci20eh3ae0 Auto-created default subnet for zone ru-central1-b in default 10.129.0.0/24   Active ru-central1-b	—	—	
+default-ru-central1-a	e9b4s5s0ga2h7u9ckfk3 Auto-created default subnet for zone ru-central1-a in default 10.128.0.0/24   Active ru-central1-a	—	—
